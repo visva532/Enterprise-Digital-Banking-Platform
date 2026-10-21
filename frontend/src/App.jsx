@@ -8,9 +8,11 @@ import Kyc from "./pages/Kyc.jsx";
 import Security from "./pages/Security.jsx";
 import Architecture from "./pages/Architecture.jsx";
 import SignIn from "./pages/SignIn.jsx";
+import SignUp from "./pages/SignUp.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import NotFound from "./pages/NotFound.jsx";
+
 
 export default function App() {
   return (
@@ -24,6 +26,7 @@ export default function App() {
         <Route path="security" element={<Security />} />
         <Route path="architecture" element={<Architecture />} />
         <Route path="sign-in" element={<SignIn />} />
+        <Route path="signup" element={<SignUp />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
         <Route path="*" element={<NotFound />} />

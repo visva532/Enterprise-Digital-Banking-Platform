@@ -152,6 +152,10 @@ export default function SignIn() {
                 Staff roles (Teller, Manager, Admin) provide access to transaction oversight and approval queues.
               </p>
             </form>
+            <p className="note" style={{ marginTop: 18 }}>
+  Don't have an account?{" "}
+  <Link to="/signup">Create an account</Link>
+</p>
           </div>
         </div>
       </section>
