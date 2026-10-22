@@ -219,6 +219,15 @@ tbody tr:last-child td { border-bottom: 0; }
 .stack dt, .stack dd { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .stack dt { color: var(--muted); font-weight: 550; }
 .stack dd { font-weight: 600; }
+/* Visva change*/
+.notice.success {
+  background: #e8f7ee;
+  color: #146c43;
+  border: 1px solid #b7e4c7;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
 
 /* Forms */
 .form-card { max-width: 480px; padding: 28px; }
