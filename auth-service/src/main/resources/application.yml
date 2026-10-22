@@ -1,0 +1,45 @@
+
+server:
+  port: 8086
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+management:
+  health:
+    mail:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:fincore-nexus-dev-secret-key-change-me-in-production-0123456789}
+    expiration-minutes: 15
+
+  otp:
+    expiry-minutes: 5
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+
+  mail:
+    from: no-reply@fincore.com
