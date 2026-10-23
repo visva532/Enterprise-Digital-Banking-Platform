@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import Icon from "../components/Icon.jsx";
-import Pipeline from "../components/Pipeline.jsx";
+
 import { sections } from "../components/Layout.jsx";
 import { site } from "../config.js";
 
@@ -23,10 +23,10 @@ export default function Home() {
                 See how a transfer works
                 <Icon name="arrow" size={18} />
               </Link>
-              <Link className="btn btn-quiet" to="/architecture">View the architecture</Link>
+              
             </div>
           </div>
-          <Pipeline />
+          
         </div>
       </section>
 
@@ -42,7 +42,7 @@ export default function Home() {
                 <span className="ico"><Icon name={s.icon} /></span>
                 <span className="name">{s.label}</span>
                 <span className="desc">{s.blurb}</span>
-                <Icon name="arrow" className="go" />
+                <Icon name="arrow" className="go"/>
               </Link>
             ))}
           </nav>

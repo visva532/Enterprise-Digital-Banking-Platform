@@ -8,9 +8,9 @@ export const sections = [
   { to: "/accounts", label: "Accounts", icon: "accounts", blurb: "Open, hold and close accounts with a balance that is always in step with the ledger." },
   { to: "/payments", label: "Payments", icon: "payments", blurb: "Send money by IMPS, NEFT or UPI, with a fraud check first and a refund if anything fails." },
   { to: "/loans", label: "Loans", icon: "loans", blurb: "Apply, get assessed, and see exactly how a repayment schedule is worked out." },
-  { to: "/kyc", label: "KYC", icon: "kyc", blurb: "Verify a customer with documents, a face match and a liveness check." },
-  { to: "/security", label: "Security", icon: "security", blurb: "Role based access, approvals for critical actions and a log nobody can edit." },
-  { to: "/architecture", label: "Architecture", icon: "architecture", blurb: "The services, events and data stores behind every screen." },
+  { to: "/kyc", label: "KYC", icon: "kyc", blurb: "Verify a customer with documents, a face match and a liveness check." }
+  
+  
 ];
 
 export default function Layout() {

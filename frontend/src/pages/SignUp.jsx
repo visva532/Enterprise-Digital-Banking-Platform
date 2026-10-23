@@ -170,7 +170,7 @@ export default function SignUp() {
             </form>
 
             <p className="note" style={{ marginTop: 18 }}>
-              Already have an account? <Link to="/signin">Sign in</Link>
+              Already have an account? <Link to="/sign-in">Sign in</Link>
             </p>
           </div>
         </div>
