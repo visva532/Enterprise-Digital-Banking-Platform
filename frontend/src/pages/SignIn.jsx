@@ -4,6 +4,7 @@ import PageHead from "../components/PageHead.jsx";
 import Icon from "../components/Icon.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { authApi, ApiError } from "../lib/api.js";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignIn() {
   const { user, isAuthenticated, login, logout } = useAuth();
@@ -23,10 +24,10 @@ export default function SignIn() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    if (!EMAIL_RE.test(cleanEmail)) {
+  setError("Please enter a valid email address.");
+  return;
+}
     if (!password.trim()) {
       setError("Please enter your password.");
       return;

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import PageHead from "../components/PageHead.jsx";
 import Icon from "../components/Icon.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
+import AccountStatusCard from "../components/AccountStatusCard.jsx";
 
 const states = [
   { id: "pending", label: "Pending KYC", tone: "warn", text: "A customer has asked to open an account. It cannot hold money until identity checks pass.", rules: ["The request is recorded with the customer's details.", "KYC verification starts automatically.", "No deposits or withdrawals are allowed yet."], next: "Moves to Active when KYC is verified." },
@@ -24,6 +25,7 @@ export default function Accounts() {
   const s = states.find((x) => x.id === sel);
   return (
     <>
+    <AccountStatusCard />
       <PageHead
         title="Accounts"
         lead="An account moves through a small set of states. Each state decides what is allowed, and every change is recorded."

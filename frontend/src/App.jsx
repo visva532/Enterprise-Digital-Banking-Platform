@@ -14,27 +14,50 @@ import Terms from "./pages/Terms.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-
+import OpenAccount from "./pages/OpenAccount.jsx";
+import RequireAccount from "./components/RequireAccount.jsx";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+
         <Route path="accounts" element={<Accounts />} />
-        <Route path="payments" element={<Payments />} />
-        <Route path="loans" element={<Loans />} />
+
+        <Route
+          path="payments"
+          element={
+            <RequireAccount>
+              <Payments />
+            </RequireAccount>
+          }
+        />
+
+        <Route
+          path="loans"
+          element={
+            <RequireAccount>
+              <Loans />
+            </RequireAccount>
+          }
+        />
+
         <Route path="kyc" element={<Kyc />} />
         <Route path="security" element={<Security />} />
         <Route path="architecture" element={<Architecture />} />
+
         <Route path="sign-in" element={<SignIn />} />
         <Route path="signup" element={<SignUp />} />
+
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
+
+        <Route path="open-account" element={<OpenAccount />} />
+        <Route path="verify-email" element={<VerifyEmail />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+
         <Route path="*" element={<NotFound />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
     </Routes>
   );
