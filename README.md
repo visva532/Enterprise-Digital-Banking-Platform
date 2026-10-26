@@ -51,3 +51,13 @@ Create an account in the app. OTP emails are NOT sent to Gmail in dev. Open http
 **Git rules**
 - Pull before you push: `git pull origin <branch>`.
 - Don't push directly to someone else's branch. Open a pull request.
+- **2. Start the backend**
+```
+cd edbp-backend
+docker compose up -d
+```
+This starts MySQL (host port 3307), Redis and Mailpit (fake inbox).
+Then in IntelliJ: File > Open > select the `edbp-backend` folder, set Project SDK to JDK 21, reload Maven, choose the run configuration **Backend (all services)** and click Run.
+It starts auth-service (8086), customer-service (8081) and account-service (8082) together.
+
+Check the health URLs: http://localhost:8086/actuator/health, :8081 and :8082 should all show UP.

@@ -1,17 +1,32 @@
+
 services:
   mysql:
     image: mysql:8
+    container_name: fincore-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-    ports: ["3307:3306"]
-    volumes: [ mysql_data:/var/lib/mysql ]
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   redis:
     image: redis:7
-    ports: [ "6379:6379" ]
+    container_name: fincore-redis
+    ports:
+      - "6379:6379"
+
   mailpit:
     image: axllent/mailpit
+    container_name: fincore-mailpit
     ports:
-        - "1025:1025"
-        - "8025:8025"
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   mysql_data:
