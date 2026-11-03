@@ -38,6 +38,8 @@ npm install
 npm run dev
 ```
 Open http://localhost:5173.
+setx ADMIN_EMAIL "tharunvishva427@gmail.com"
+setx ADMIN_PASSWORD "visvavisva@532"
 
 **4. Test sign up**
 Create an account in the app. OTP emails are NOT sent to Gmail in dev. Open http://localhost:8025 (Mailpit) to read the OTP.

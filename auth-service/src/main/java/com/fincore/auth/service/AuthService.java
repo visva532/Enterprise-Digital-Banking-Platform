@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import static com.fincore.auth.dto.AuthDtos.*;
 
 @Service
@@ -21,6 +22,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
     private final JwtService jwtService;
+    private final EmailService emailService;
 
     public MessageResponse signUp(SignUpRequest req) {
         String email = normalize(req.email());
@@ -75,6 +77,12 @@ public class AuthService {
         if (!user.isEnabled()) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Account is disabled. Please contact support.");
         }
+        // The "Sign in as" option must match the role this account really has
+        if (req.loginAs() != null && !req.loginAs().isBlank()
+                && !user.getRole().name().equalsIgnoreCase(req.loginAs())) {
+            throw new ApiException(HttpStatus.FORBIDDEN,
+                    "This account is not registered for the selected sign-in type.");
+        }
         return buildAuthResponse(user);
     }
 
@@ -96,6 +104,7 @@ public class AuthService {
 
         user.setPasswordHash(passwordEncoder.encode(req.newPassword()));
         userRepository.save(user);
+        emailService.sendPasswordChanged(email);
         return new MessageResponse("Password reset successful. Please sign in.");
     }
 
@@ -106,7 +115,8 @@ public class AuthService {
                 jwtService.getExpiresInSeconds(),
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name());
+                user.getRole().name(),
+                user.getFullName());
     }
 
     private String normalize(String email) {

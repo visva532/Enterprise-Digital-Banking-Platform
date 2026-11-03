@@ -17,8 +17,8 @@ public final class AuthDtos {
 
     public record SignInRequest(
             @NotBlank @Email String email,
-            @NotBlank String password) {}
-
+            @NotBlank String password,
+            String loginAs) {}
     public record EmailRequest(
             @NotBlank @Email String email) {}
 
@@ -37,7 +37,8 @@ public final class AuthDtos {
             long expiresInSeconds,
             String userId,
             String email,
-            String role) {}
+            String role,
+            String fullName) {}
 
     public record MessageResponse(String message) {}
 }

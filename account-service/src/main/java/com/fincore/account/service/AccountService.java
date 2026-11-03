@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fincore.account.event.AccountOpenedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -22,11 +24,13 @@ import static com.fincore.account.dto.AccountDtos.*;
 public class AccountService {
 
     private static final String IFSC = "FNCR0000001";
-    private static final List<AccountStatus> OPEN_STATUSES = List.of(AccountStatus.ACTIVE, AccountStatus.FROZEN);
+    private static final List<AccountStatus> OPEN_STATUSES =
+            List.of(AccountStatus.ACTIVE, AccountStatus.FROZEN, AccountStatus.BLOCKED);
 
     private final BankAccountRepository accountRepository;
     private final OtpService otpService;
     private final PiiHasher piiHasher;
+    private final ApplicationEventPublisher events;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -100,7 +104,11 @@ public class AccountService {
         account.setIfsc(IFSC);
         account.setStatus(AccountStatus.ACTIVE);
         account.setActivatedAt(Instant.now());
-        return AccountResponse.from(accountRepository.save(account));
+        BankAccount saved = accountRepository.save(account);
+        events.publishEvent(new AccountOpenedEvent(
+                saved.getEmail(), saved.getFullName(), saved.getAccountNumber(),
+                saved.getIfsc(), saved.getAccountType().name()));
+        return AccountResponse.from(saved);
     }
 
     @Transactional

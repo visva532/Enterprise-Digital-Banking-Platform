@@ -22,6 +22,8 @@ public class User {
 
     @Column(nullable = false)
     private String passwordHash;
+    @Column(length = 100)
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

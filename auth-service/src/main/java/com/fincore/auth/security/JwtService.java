@@ -3,6 +3,7 @@ package com.fincore.auth.security;
 
 import com.fincore.auth.entity.User;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,9 @@ public class JwtService {
 
         this.expirationMinutes = expirationMinutes;
     }
-
+    public Claims parse(String token) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+    }
     public String generateToken(User user) {
         Instant now = Instant.now();
 

@@ -4,6 +4,8 @@ import com.fincore.customer.entity.Customer;
 import com.fincore.customer.exception.ApiException;
 import com.fincore.customer.repository.CustomerRepository;
 import com.fincore.customer.security.AuthUser;
+import org.springframework.data.domain.PageRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,11 @@ public class CustomerService {
         return repository.findByUserId(userId)
                 .map(CustomerResponse::from)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Customer not found"));
+    }
+    @Transactional(readOnly = true)
+    public List<CustomerResponse> search(String q) {
+        String term = q == null ? "" : q.trim();
+        return repository.search(term, PageRequest.of(0, 100)).stream().map(CustomerResponse::from).toList();
     }
 
     // The profile row is created automatically the first time a logged-in user asks for it
