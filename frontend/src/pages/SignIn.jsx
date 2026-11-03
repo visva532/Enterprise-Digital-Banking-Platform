@@ -4,13 +4,14 @@ import PageHead from "../components/PageHead.jsx";
 import Icon from "../components/Icon.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { authApi, ApiError } from "../lib/api.js";
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { SIGN_IN_OPTIONS, homeForRole } from "../lib/roles.js";
 
 export default function SignIn() {
   const { user, isAuthenticated, login, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [loginAs, setLoginAs] = useState("CUSTOMER");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,10 +25,10 @@ export default function SignIn() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    if (!EMAIL_RE.test(cleanEmail)) {
-  setError("Please enter a valid email address.");
-  return;
-}
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     if (!password.trim()) {
       setError("Please enter your password.");
       return;
@@ -35,11 +36,11 @@ export default function SignIn() {
 
     setLoading(true);
     try {
-      const auth = await authApi.signIn(cleanEmail, password);
+      const auth = await authApi.signIn(cleanEmail, password, loginAs);
       login(auth);
-      navigate("/accounts");
+      navigate(homeForRole(auth.role));
     } catch (err) {
-      // Account exists but the email was never verified: send a new OTP and go to the OTP screen
+      // Customer who never verified the email: send a new OTP and go to the OTP screen
       if (err instanceof ApiError && err.status === 403 && /not verified/i.test(err.message)) {
         authApi.resendOtp(cleanEmail).catch(() => {});
         navigate("/verify-email", { state: { email: cleanEmail } });
@@ -52,39 +53,29 @@ export default function SignIn() {
   };
 
   if (isAuthenticated) {
+    const isCustomer = user?.role === "CUSTOMER";
     return (
       <>
-        <PageHead
-          title="Sign in"
-          lead="You are authenticated with FinCore Nexus."
-        />
+        <PageHead title="Sign in" lead="You are authenticated with FinCore Nexus." />
 
         <section className="block">
           <div className="container">
             <div className="panel form-card">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 18,
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <div className="user-badge">
                   <Icon name="user" size={18} />
                 </div>
-
                 <span className="tag">{user?.name || user?.email}</span>
+                <span className="tag">{user?.role}</span>
               </div>
 
               <p style={{ marginBottom: 18, color: "var(--muted)" }}>
-                Signed in as{" "}
-                <strong style={{ color: "var(--ink)" }}>{user?.email}</strong>.
+                Signed in as <strong style={{ color: "var(--ink)" }}>{user?.email}</strong>.
               </p>
 
               <div style={{ display: "grid", gap: 10 }}>
-                <Link to="/accounts" className="btn btn-primary">
-                  Go to Accounts
+                <Link to={homeForRole(user?.role)} className="btn btn-primary">
+                  {isCustomer ? "Go to Accounts" : "Open my dashboard"}
                   <Icon name="arrow" size={18} />
                 </Link>
 
@@ -102,10 +93,7 @@ export default function SignIn() {
 
   return (
     <>
-      <PageHead
-        title="Sign in"
-        lead="Sign in to your FinCore Nexus digital banking account."
-      />
+      <PageHead title="Sign in" lead="Sign in to your FinCore Nexus digital banking account." />
 
       <section className="block">
         <div className="container">
@@ -120,6 +108,30 @@ export default function SignIn() {
             )}
 
             <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label id="login-as-label">Sign in as</label>
+                <div className="role-options" role="radiogroup" aria-labelledby="login-as-label">
+                  {SIGN_IN_OPTIONS.map((option) => (
+                    <label
+                      key={option.value}
+                      className={`role-option${loginAs === option.value ? " selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="loginAs"
+                        value={option.value}
+                        checked={loginAs === option.value}
+                        onChange={() => setLoginAs(option.value)}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+                {loginAs !== "CUSTOMER" && (
+                  <span className="hint">Staff accounts are created by a FinCore Nexus administrator.</span>
+                )}
+              </div>
+
               <div className="field">
                 <label htmlFor="auth-email">Email address</label>
                 <input
@@ -168,9 +180,11 @@ export default function SignIn() {
               </button>
             </form>
 
-            <p className="note" style={{ marginTop: 18 }}>
-              Don't have an account? <Link to="/signup">Create an account</Link>
-            </p>
+            {loginAs === "CUSTOMER" && (
+              <p className="note" style={{ marginTop: 18 }}>
+                Don't have an account? <Link to="/signup">Create an account</Link>
+              </p>
+            )}
           </div>
         </div>
       </section>

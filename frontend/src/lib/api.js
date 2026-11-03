@@ -7,6 +7,7 @@ const CUSTOMER_API =
 
 const ACCOUNT_API =
   import.meta.env.VITE_ACCOUNT_API || "http://localhost:8082";
+const LOAN_API = import.meta.env.VITE_LOAN_API || "http://localhost:8083";
 
 export class ApiError extends Error {
   constructor(message, status = 0) {
@@ -91,11 +92,8 @@ async function request(
 }
 
 export const authApi = {
-  signUp: (email, password) =>
-    request(AUTH_API, "/api/auth/signup", {
-      method: "POST",
-      body: { email, password },
-    }),
+    signIn: (email, password, loginAs) =>
+    request(AUTH_API, "/api/auth/signin", { method: "POST", body: { email, password, loginAs } }),
 
   verifyOtp: (email, otp) =>
     request(AUTH_API, "/api/auth/verify-otp", {
@@ -164,4 +162,50 @@ export const accountApi = {
       token,
       body: { accountId },
     }),
+    
+};
+export const loanApi = {
+  apply: (token, payload) => request(LOAN_API, "/api/loans", { method: "POST", token, body: payload }),
+  mine: (token) => request(LOAN_API, "/api/loans/me", { token }),
+  list: (token, status) =>
+    request(LOAN_API, `/api/manager/loans${status ? `?status=${status}` : ""}`, { token }),
+  approve: (token, id, remarks) =>
+    request(LOAN_API, `/api/manager/loans/${id}/approve`, { method: "PUT", token, body: { remarks } }),
+  reject: (token, id, remarks) =>
+    request(LOAN_API, `/api/manager/loans/${id}/reject`, { method: "PUT", token, body: { remarks } }),
+};
+
+const putReason = (path) => (token, id, reason) =>
+  request(ACCOUNT_API, path.replace("{id}", id), { method: "PUT", token, body: { reason } });
+
+export const staffApi = {
+  customers: (token, q) =>
+    request(CUSTOMER_API, `/api/staff/customers?q=${encodeURIComponent(q || "")}`, { token }),
+  accounts: (token, q, status) =>
+    request(
+      ACCOUNT_API,
+      `/api/staff/accounts?q=${encodeURIComponent(q || "")}${status ? `&status=${status}` : ""}`,
+      { token }
+    ),
+  account: (token, id) => request(ACCOUNT_API, `/api/staff/accounts/${id}`, { token }),
+  transactions: (token, id) => request(ACCOUNT_API, `/api/staff/accounts/${id}/transactions`, { token }),
+  audit: (token, id) => request(ACCOUNT_API, `/api/manager/accounts/${id}/audit`, { token }),
+  freeze: putReason("/api/manager/accounts/{id}/freeze"),
+  unfreeze: putReason("/api/manager/accounts/{id}/unfreeze"),
+};
+
+export const adminApi = {
+  dashboard: (token) => request(ACCOUNT_API, "/api/admin/dashboard", { token }),
+  demoDeposit: (token, payload) =>
+    request(ACCOUNT_API, "/api/admin/demo/deposit", { method: "POST", token, body: payload }),
+  block: putReason("/api/admin/accounts/{id}/block"),
+  unblock: putReason("/api/admin/accounts/{id}/unblock"),
+  deactivate: putReason("/api/admin/accounts/{id}/deactivate"),
+  employees: (token) => request(AUTH_API, "/api/admin/employees", { token }),
+  createEmployee: (token, payload) =>
+    request(AUTH_API, "/api/admin/employees", { method: "POST", token, body: payload }),
+  changeRole: (token, id, role) =>
+    request(AUTH_API, `/api/admin/users/${id}/role`, { method: "PUT", token, body: { role } }),
+  setEnabled: (token, id, enabled) =>
+    request(AUTH_API, `/api/admin/users/${id}/enabled`, { method: "PUT", token, body: { enabled } }),
 };

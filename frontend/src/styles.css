@@ -150,6 +150,63 @@ button, input, select { font: inherit; color: inherit; }
 .status-line { margin-top: 14px; padding: 12px 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); min-height: 3.2em; }
 .status-line.ok { border-color: #a9cfc6; background: var(--brand-tint); }
 .status-line.bad { border-color: #e1b1b1; background: var(--danger-tint); }
+/* ---- Roles and staff dashboards ---- */
+.role-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 520px) { .role-options { grid-template-columns: repeat(2, 1fr); } }
+.role-option {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  padding: 10px 8px; border: 1px solid var(--line, #d0d5dd); border-radius: 8px;
+  cursor: pointer; font-size: 0.92rem;
+}
+.role-option input { position: absolute; opacity: 0; pointer-events: none; }
+.role-option.selected { border-color: #2563eb; background: rgba(37, 99, 235, 0.12); font-weight: 600; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid var(--line, #d0d5dd); }
+.tab { background: none; border: 0; padding: 10px 16px; cursor: pointer; font: inherit; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab.active { color: var(--ink); border-bottom-color: #2563eb; font-weight: 600; }
+
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.inline-form input, .inline-form select {
+  flex: 1 1 180px; padding: 10px 12px; border: 1px solid var(--line, #d0d5dd);
+  border-radius: 8px; background: transparent; color: inherit; font: inherit;
+}
+
+.table-wrap { overflow-x: auto; margin-bottom: 16px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.data-table th, .data-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line, #e5e7eb); white-space: nowrap; }
+.data-table th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; }
+.data-table tbody tr.clickable { cursor: pointer; }
+.data-table tbody tr.clickable:hover, .data-table tbody tr.selected { background: rgba(37, 99, 235, 0.1); }
+.data-table select { padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line, #d0d5dd); background: transparent; color: inherit; font: inherit; }
+
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.badge-active, .badge-approved, .badge-verified, .badge-credit { background: #e8f7ee; color: #146c43; }
+.badge-frozen, .badge-pending, .badge-not_started { background: #fff4d6; color: #8a5a00; }
+.badge-blocked, .badge-rejected, .badge-closed, .badge-debit { background: #fde8e8; color: #b42318; }
+
+.detail-card { margin-top: 18px; }
+.detail-card h4 { margin: 18px 0 8px; }
+.reason-box { display: grid; gap: 10px; margin: 16px 0; }
+.reason-box textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line, #d0d5dd);
+  border-radius: 8px; background: transparent; color: inherit; font: inherit; resize: vertical;
+}
+.action-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat-label { font-size: 0.8rem; color: var(--muted); }
+.stat-value { font-size: 1.4rem; font-weight: 700; }
+
+.flow-legend { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.dot.credit, .flow-bar.credit { background: #16a34a; }
+.dot.debit, .flow-bar.debit { background: #dc2626; }
+.flow-chart { display: flex; gap: 12px; align-items: flex-end; height: 190px; }
+.flow-day { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.flow-bars { flex: 1; display: flex; align-items: flex-end; gap: 4px; width: 100%; justify-content: center; }
+.flow-bar { width: 40%; min-height: 2px; border-radius: 4px 4px 0 0; }
+.flow-label { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
 
 /* Progress */
 .progress { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 18px; }

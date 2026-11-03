@@ -3,9 +3,12 @@ import PageHead from "./PageHead.jsx";
 import Icon from "./Icon.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { useAccounts } from "../lib/useAccounts.js";
+import { homeForRole } from "../lib/roles.js";
 
 export default function RequireAccount({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+    // Staff do not use customer pages
+  if (user?.role && user.role !== "CUSTOMER") return <Navigate to={homeForRole(user.role)} replace />;
   const { hasAccount, loading, error, reload } = useAccounts();
 
   if (!isAuthenticated) return <Navigate to="/signin" replace />;

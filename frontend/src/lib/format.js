@@ -8,3 +8,7 @@ export function formatINR(value) {
     currency: "INR",
   }).format(Number(value || 0));
 }
+export function formatDateTime(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}

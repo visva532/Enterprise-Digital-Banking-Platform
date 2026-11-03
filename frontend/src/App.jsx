@@ -16,6 +16,11 @@ import VerifyEmail from "./pages/VerifyEmail.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import OpenAccount from "./pages/OpenAccount.jsx";
 import RequireAccount from "./components/RequireAccount.jsx";
+import RoleRoute from "./components/RoleRoute.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import ManagerDashboard from "./pages/ManagerDashboard.jsx";
+import TellerDashboard from "./pages/TellerDashboard.jsx";
+import MyLoans from "./pages/MyLoans.jsx";
 
 export default function App() {
   return (
@@ -56,6 +61,10 @@ export default function App() {
         <Route path="open-account" element={<OpenAccount />} />
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin" element={<RoleRoute roles={["ADMIN"]}><AdminDashboard /></RoleRoute>} />
+        <Route path="/manager" element={<RoleRoute roles={["MANAGER"]}><ManagerDashboard /></RoleRoute>} />
+        <Route path="/teller" element={<RoleRoute roles={["TELLER"]}><TellerDashboard /></RoleRoute>} />
+        <Route path="/my-loans" element={<RequireAccount><MyLoans /></RequireAccount>} />
 
         <Route path="*" element={<NotFound />} />
       </Route>

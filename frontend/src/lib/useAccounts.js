@@ -4,7 +4,7 @@ import { accountApi } from "./api.js";
 
 export function useAccounts() {
   const { user, isAuthenticated } = useAuth();
-  const token = user?.token;
+   const token = user?.role === "CUSTOMER" ? user.token : undefined;
 
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(isAuthenticated);

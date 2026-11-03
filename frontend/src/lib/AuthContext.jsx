@@ -46,6 +46,7 @@ export function AuthProvider({ children }) {
   }, [user?.expiresAt]);
 
   // `auth` is the response from /signin or /verify-otp
+   // `auth` is the response from /signin or /verify-otp
   const login = (auth) => {
     const session = {
       userId: auth.userId,
@@ -53,19 +54,21 @@ export function AuthProvider({ children }) {
       role: auth.role,
       token: auth.accessToken,
       expiresAt: Date.now() + auth.expiresInSeconds * 1000,
-      name: auth.email.split("@")[0],
+      name: auth.fullName || auth.email.split("@")[0],
     };
     setUser(session);
 
-    // Best effort: load the real name from Customer Service
-    customerApi
-      .getMe(session.token)
-      .then((profile) => {
-        if (profile?.fullName) {
-          setUser((prev) => (prev ? { ...prev, name: profile.fullName } : prev));
-        }
-      })
-      .catch(() => {});
+    // Only customers have a profile in Customer Service
+    if (auth.role === "CUSTOMER") {
+      customerApi
+        .getMe(session.token)
+        .then((profile) => {
+          if (profile?.fullName) {
+            setUser((prev) => (prev ? { ...prev, name: profile.fullName } : prev));
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   const logout = () => setUser(null);

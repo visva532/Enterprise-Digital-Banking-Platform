@@ -8,7 +8,7 @@ export default function AccountStatusCard() {
   const { isAuthenticated, user } = useAuth();
   const { primaryAccount, hasAccount, loading, error, reload } = useAccounts();
 
-  if (!isAuthenticated) return null;
+    if (!isAuthenticated || user?.role !== "CUSTOMER") return null;
 
   if (loading) {
     return (
@@ -80,6 +80,15 @@ export default function AccountStatusCard() {
           <dd>{primaryAccount.status}</dd>
         </div>
       </dl>
+            {primaryAccount.status !== "ACTIVE" && (
+        <div className="notice error" role="alert">
+          <Icon name="alert" size={18} />
+          Your account is {primaryAccount.status}. Please contact your branch for help.
+        </div>
+      )}
+      <Link to="/my-loans" className="btn btn-outline">
+        Apply for a loan
+      </Link>
     </div>
   );
 }
