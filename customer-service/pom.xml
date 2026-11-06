@@ -10,8 +10,8 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>auth-service</artifactId>
-    <name>auth-service</name>
+    <artifactId>customer-service</artifactId>
+    <name>customer-service</name>
 
     <dependencies>
         <dependency>
