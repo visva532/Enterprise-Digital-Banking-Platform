@@ -1,124 +1,64 @@
-
-const AUTH_API =
-  import.meta.env.VITE_AUTH_API || "http://localhost:8086";
-
-const CUSTOMER_API =
-  import.meta.env.VITE_CUSTOMER_API || "http://localhost:8081";
-
-const ACCOUNT_API =
-  import.meta.env.VITE_ACCOUNT_API || "http://localhost:8082";
+const AUTH_API = import.meta.env.VITE_AUTH_API || "http://localhost:8086";
+const CUSTOMER_API = import.meta.env.VITE_CUSTOMER_API || "http://localhost:8081";
+const ACCOUNT_API = import.meta.env.VITE_ACCOUNT_API || "http://localhost:8082";
 const LOAN_API = import.meta.env.VITE_LOAN_API || "http://localhost:8083";
 
 export class ApiError extends Error {
-  constructor(message, status = 0) {
+  constructor(message, status) {
     super(message);
-    this.name = "ApiError";
     this.status = status;
   }
 }
 
-async function request(
-  baseUrl,
-  path,
-  { method = "GET", body, token } = {}
-) {
+async function request(baseUrl, path, { method = "GET", body, token } = {}) {
   let response;
-
   try {
     response = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
-        Accept: "application/json",
-        ...(body !== undefined
-          ? { "Content-Type": "application/json" }
-          : {}),
-        ...(token
-          ? { Authorization: `Bearer ${token}` }
-          : {}),
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      ...(body !== undefined
-        ? { body: JSON.stringify(body) }
-        : {}),
+      body: body ? JSON.stringify(body) : undefined,
     });
-  } catch (error) {
-    console.error("API connection failed:", {
-      url: `${baseUrl}${path}`,
-      error,
-    });
-
+  } catch {
     throw new ApiError(
-      `Cannot connect to ${baseUrl}. Check that the backend is running, CORS is configured, and the browser can reach the server.`,
+      "Cannot reach the server. Please check that the backend is running.",
       0
     );
   }
 
-  const contentType = response.headers.get("content-type") || "";
   let data = null;
-
   try {
-    if (contentType.includes("application/json")) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
-      data = text ? { message: text } : null;
-    }
-  } catch (error) {
-    console.error("Could not read API response:", error);
+    data = await response.json();
+  } catch {
+    // empty body
   }
 
   if (!response.ok) {
-    const fieldErrors = data?.errors
-      ? Object.values(data.errors)
-          .flat()
-          .join(" ")
-      : null;
-
-    const message =
-      fieldErrors ||
-      data?.message ||
-      data?.error ||
-      `Request failed with HTTP ${response.status}.`;
-
-    console.error("API request failed:", {
-      url: `${baseUrl}${path}`,
-      status: response.status,
-      response: data,
-    });
-
-    throw new ApiError(message, response.status);
+    if (response.status === 401) {
+      throw new ApiError("Your session has expired. Please sign in again.", 401);
+    }
+    const fieldErrors = data?.errors ? Object.values(data.errors).join(" ") : null;
+    throw new ApiError(
+      fieldErrors || data?.message || "Something went wrong. Please try again.",
+      response.status
+    );
   }
-
   return data;
 }
 
 export const authApi = {
-    signIn: (email, password, loginAs) =>
-    request(AUTH_API, "/api/auth/signin", { method: "POST", body: { email, password, loginAs } }),
-
+  signUp: (email, password) =>
+    request(AUTH_API, "/api/auth/signup", { method: "POST", body: { email, password } }),
   verifyOtp: (email, otp) =>
-    request(AUTH_API, "/api/auth/verify-otp", {
-      method: "POST",
-      body: { email, otp },
-    }),
-
+    request(AUTH_API, "/api/auth/verify-otp", { method: "POST", body: { email, otp } }),
   resendOtp: (email) =>
-    request(AUTH_API, "/api/auth/resend-otp", {
-      method: "POST",
-      body: { email },
-    }),
-
-  signIn: (email, password) =>
-    request(AUTH_API, "/api/auth/signin", {
-      method: "POST",
-      body: { email, password },
-    }),
-
+    request(AUTH_API, "/api/auth/resend-otp", { method: "POST", body: { email } }),
+  signIn: (email, password, loginAs) =>
+    request(AUTH_API, "/api/auth/signin", { method: "POST", body: { email, password, loginAs } }),
   forgotPassword: (email) =>
-    request(AUTH_API, "/api/auth/forgot-password", {
-      method: "POST",
-      body: { email },
-    }),
-
+    request(AUTH_API, "/api/auth/forgot-password", { method: "POST", body: { email } }),
   resetPassword: (email, otp, newPassword) =>
     request(AUTH_API, "/api/auth/reset-password", {
       method: "POST",
@@ -127,43 +67,29 @@ export const authApi = {
 };
 
 export const customerApi = {
-  getMe: (token) =>
-    request(CUSTOMER_API, "/api/customers/me", { token }),
-
+  getMe: (token) => request(CUSTOMER_API, "/api/customers/me", { token }),
   updateMe: (token, profile) =>
-    request(CUSTOMER_API, "/api/customers/me", {
-      method: "PUT",
-      token,
-      body: profile,
-    }),
+    request(CUSTOMER_API, "/api/customers/me", { method: "PUT", token, body: profile }),
 };
 
 export const accountApi = {
-  getMine: (token) =>
-    request(ACCOUNT_API, "/api/accounts/me", { token }),
-
+  getMine: (token) => request(ACCOUNT_API, "/api/accounts/me", { token }),
   initiate: (token, payload) =>
-    request(ACCOUNT_API, "/api/accounts/open", {
-      method: "POST",
-      token,
-      body: payload,
-    }),
-
+    request(ACCOUNT_API, "/api/accounts/open", { method: "POST", token, body: payload }),
   verify: (token, accountId, otp) =>
     request(ACCOUNT_API, "/api/accounts/open/verify", {
       method: "POST",
       token,
       body: { accountId, otp },
     }),
-
   resend: (token, accountId) =>
     request(ACCOUNT_API, "/api/accounts/open/resend", {
       method: "POST",
       token,
       body: { accountId },
     }),
-    
 };
+
 export const loanApi = {
   apply: (token, payload) => request(LOAN_API, "/api/loans", { method: "POST", token, body: payload }),
   mine: (token) => request(LOAN_API, "/api/loans/me", { token }),
