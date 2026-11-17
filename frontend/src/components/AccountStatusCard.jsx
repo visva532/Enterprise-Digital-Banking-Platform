@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import Icon from "./Icon.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
@@ -8,7 +9,7 @@ export default function AccountStatusCard() {
   const { isAuthenticated, user } = useAuth();
   const { primaryAccount, hasAccount, loading, error, reload } = useAccounts();
 
-    if (!isAuthenticated || user?.role !== "CUSTOMER") return null;
+  if (!isAuthenticated || user?.role !== "CUSTOMER") return null;
 
   if (loading) {
     return (
@@ -18,7 +19,8 @@ export default function AccountStatusCard() {
     );
   }
 
-  // If the account service is down we say so, instead of wrongly suggesting a new account
+  // If the account service is down, show the error instead of
+  // wrongly suggesting that the customer needs a new account.
   if (error) {
     return (
       <div className="panel account-card">
@@ -26,7 +28,12 @@ export default function AccountStatusCard() {
           <Icon name="alert" size={18} />
           {error}
         </div>
-        <button type="button" className="btn btn-outline" onClick={reload}>
+
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={reload}
+        >
           Try again
         </button>
       </div>
@@ -37,22 +44,28 @@ export default function AccountStatusCard() {
     return (
       <div className="panel account-card">
         <span className="tag">Action needed</span>
+
         <h3>Open your FinCore Nexus account</h3>
+
         <p style={{ color: "var(--muted)" }}>
-          Hi {user?.name || user?.email}, you are signed in but do not have a bank account yet.
-          Open one to unlock:
+          Hi {user?.name || user?.email}, you are signed in but do not
+          have a bank account yet. Open one to unlock:
         </p>
+
         <ul className="account-perks">
           <li>Send money with IMPS, NEFT and UPI</li>
           <li>Apply for home and personal loans</li>
           <li>Statements, beneficiaries and KYC status</li>
         </ul>
+
         <Link to="/open-account" className="btn btn-primary">
           Open an account
           <Icon name="arrow" size={18} />
         </Link>
+
         <p className="note" style={{ marginTop: 12 }}>
-          Keep your Aadhaar number, the mobile number linked to it, your PAN and your address ready.
+          Keep your Aadhaar number, the mobile number linked to it,
+          your PAN and your address ready.
         </p>
       </div>
     );
@@ -60,35 +73,62 @@ export default function AccountStatusCard() {
 
   return (
     <div className="panel account-card">
-      <span className="tag">{primaryAccount.accountType} account</span>
+      <span className="tag">
+        {primaryAccount.accountType} account
+      </span>
+
       <h3>{primaryAccount.fullName}</h3>
+
       <dl className="account-facts">
         <div>
           <dt>Account number</dt>
-          <dd>{formatAccountNumber(primaryAccount.accountNumber)}</dd>
+          <dd>
+            {formatAccountNumber(primaryAccount.accountNumber)}
+          </dd>
         </div>
+
         <div>
           <dt>IFSC</dt>
           <dd>{primaryAccount.ifsc}</dd>
         </div>
+
         <div>
           <dt>Balance</dt>
           <dd>{formatINR(primaryAccount.balance)}</dd>
         </div>
+
         <div>
           <dt>Status</dt>
           <dd>{primaryAccount.status}</dd>
         </div>
       </dl>
-            {primaryAccount.status !== "ACTIVE" && (
+
+      {primaryAccount.status !== "ACTIVE" && (
         <div className="notice error" role="alert">
           <Icon name="alert" size={18} />
-          Your account is {primaryAccount.status}. Please contact your branch for help.
+          Your account is {primaryAccount.status}.
+          Please contact your branch for help.
         </div>
       )}
-      <Link to="/my-loans" className="btn btn-outline">
-        Apply for a loan
-      </Link>
+
+      {/* Customer action shortcuts */}
+      <div className="action-row">
+        <Link to="/payments" className="btn btn-primary">
+          Send money
+          <Icon name="arrow" size={18} />
+        </Link>
+
+        <Link
+          to="/payments?tab=history"
+          className="btn btn-outline"
+        >
+          View statement
+        </Link>
+
+        <Link to="/my-loans" className="btn btn-outline">
+          Apply for a loan
+        </Link>
+      </div>
     </div>
   );
 }

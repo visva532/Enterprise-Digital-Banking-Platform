@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { customerApi } from "./api.js";
+import { customerApi, setUnauthorizedHandler } from "./api.js";
 
 const AuthContext = createContext(null);
 
@@ -44,7 +44,12 @@ export function AuthProvider({ children }) {
     const timer = setTimeout(() => setUser(null), ms);
     return () => clearTimeout(timer);
   }, [user?.expiresAt]);
+  // Sign out when an API reports that the token has expired
+  useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null));
 
+    return () => setUnauthorizedHandler(null);
+  }, []);
   // `auth` is the response from /signin or /verify-otp
    // `auth` is the response from /signin or /verify-otp
   const login = (auth) => {

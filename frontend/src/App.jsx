@@ -48,7 +48,7 @@ export default function App() {
           }
         />
 
-        <Route path="kyc" element={<Kyc />} />
+       <Route path="/kyc" element={<RoleRoute roles={["CUSTOMER"]}><Kyc /></RoleRoute>} />
         <Route path="security" element={<Security />} />
         <Route path="architecture" element={<Architecture />} />
 

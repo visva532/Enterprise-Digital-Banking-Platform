@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import PageHead from "../components/PageHead.jsx";
 import Tabs from "../components/Tabs.jsx";
 import LoansPanel from "../components/LoansPanel.jsx";
 import CustomersPanel from "../components/CustomersPanel.jsx";
 import AccountsPanel from "../components/AccountsPanel.jsx";
+import KycReviewPanel from "../components/KycReviewPanel.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 
 export default function ManagerDashboard() {
@@ -12,7 +14,11 @@ export default function ManagerDashboard() {
 
   return (
     <>
-      <PageHead title="Manager console" lead={`Signed in as ${user.name}`} />
+      <PageHead
+        title="Manager console"
+        lead={`Signed in as ${user.name}`}
+      />
+
       <section className="block">
         <div className="container">
           <Tabs
@@ -22,11 +28,19 @@ export default function ManagerDashboard() {
               { key: "loans", label: "Loan applications" },
               { key: "accounts", label: "Accounts" },
               { key: "customers", label: "Customers" },
+              { key: "kyc", label: "KYC review" },
             ]}
           />
+
           {tab === "loans" && <LoansPanel />}
-          {tab === "accounts" && <AccountsPanel canFreeze showAudit />}
+
+          {tab === "accounts" && (
+            <AccountsPanel canFreeze showAudit />
+          )}
+
           {tab === "customers" && <CustomersPanel />}
+
+          {tab === "kyc" && <KycReviewPanel canReview />}
         </div>
       </section>
     </>

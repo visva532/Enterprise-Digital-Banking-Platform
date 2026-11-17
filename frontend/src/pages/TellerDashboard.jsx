@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import PageHead from "../components/PageHead.jsx";
 import Tabs from "../components/Tabs.jsx";
 import CustomersPanel from "../components/CustomersPanel.jsx";
 import AccountsPanel from "../components/AccountsPanel.jsx";
+import KycReviewPanel from "../components/KycReviewPanel.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 
 export default function TellerDashboard() {
@@ -11,7 +13,11 @@ export default function TellerDashboard() {
 
   return (
     <>
-      <PageHead title="Teller desk" lead={`Signed in as ${user.name}`} />
+      <PageHead
+        title="Teller desk"
+        lead={`Signed in as ${user.name}`}
+      />
+
       <section className="block">
         <div className="container">
           <Tabs
@@ -20,10 +26,15 @@ export default function TellerDashboard() {
             tabs={[
               { key: "customers", label: "Customer search" },
               { key: "accounts", label: "Accounts and transactions" },
+              { key: "kyc", label: "KYC status" },
             ]}
           />
+
           {tab === "customers" && <CustomersPanel />}
+
           {tab === "accounts" && <AccountsPanel />}
+
+          {tab === "kyc" && <KycReviewPanel />}
         </div>
       </section>
     </>

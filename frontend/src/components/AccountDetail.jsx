@@ -129,6 +129,7 @@ export default function AccountDetail({ accountId, canFreeze, canBlock, showAudi
                 { key: "amount", label: "Amount", render: (t) => formatINR(t.amount) },
                 { key: "balanceAfter", label: "Balance after", render: (t) => formatINR(t.balanceAfter) },
                 { key: "description", label: "Description", render: (t) => t.description || "-" },
+                { key: "counterpartyName", label: "Other party", render: (t) => t.counterpartyName ? `${t.counterpartyName} (${t.counterpartyAccount})` : "-" },
                 { key: "reference", label: "Reference" },
               ]}
               rows={transactions}

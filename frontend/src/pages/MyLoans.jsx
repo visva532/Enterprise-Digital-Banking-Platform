@@ -8,6 +8,7 @@ import { useAuth } from "../lib/AuthContext.jsx";
 import { loanApi } from "../lib/api.js";
 import { useAsync } from "../lib/useAsync.js";
 import { formatDateTime, formatINR } from "../lib/format.js";
+import { Link } from "react-router-dom";
 
 export default function MyLoans() {
   const { user } = useAuth();

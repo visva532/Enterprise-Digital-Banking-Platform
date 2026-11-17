@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PageHead from "../components/PageHead.jsx";
@@ -20,21 +21,36 @@ export default function SignUp() {
     password: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const goToVerify = (email, fullName, phone) => {
     try {
-      // Saved to Customer Service after the email is verified
-      sessionStorage.setItem(PENDING_PROFILE_KEY, JSON.stringify({ email, fullName, phone }));
+      sessionStorage.setItem(
+        PENDING_PROFILE_KEY,
+        JSON.stringify({
+          email,
+          fullName,
+          phone,
+        })
+      );
     } catch {
-      // ignore: the profile can be completed later
+      // Profile can be completed later if storage is unavailable.
     }
-    navigate("/verify-email", { state: { email } });
+
+    navigate("/verify-email", {
+      state: { email },
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -45,38 +61,79 @@ export default function SignUp() {
     const phone = form.phone.trim();
     const email = form.email.trim().toLowerCase();
 
-    if (!name) return setError("Please enter your full name.");
-    if (!PHONE_RE.test(phone)) return setError("Enter a valid 10-digit Indian mobile number.");
-    if (!EMAIL_RE.test(email)) return setError("Please enter a valid email address.");
-    if (!PASSWORD_RE.test(form.password)) {
-      return setError("Password must be 8-64 characters with at least one letter and one number.");
+    if (!name) {
+      setError("Please enter your full name.");
+      return;
     }
-    if (form.password !== form.confirmPassword) return setError("Passwords do not match.");
+
+    if (!PHONE_RE.test(phone)) {
+      setError("Enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+
+    if (!EMAIL_RE.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!PASSWORD_RE.test(form.password)) {
+      setError(
+        "Password must be 8-64 characters with at least one letter and one number."
+      );
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
     setLoading(true);
+
     try {
       await authApi.signUp(email, form.password);
+
       goToVerify(email, name, phone);
     } catch (err) {
-      // 429 = an OTP was already sent a moment ago. The user can just enter it.
       if (err instanceof ApiError && err.status === 429) {
         goToVerify(email, name, phone);
         return;
       }
-      setError(err.message || "Unable to create your account. Please try again.");
+
+      setError(
+        err.message ||
+        "Unable to create your account. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <PageHead title="Create Account" lead="Join FinCore Nexus digital banking." />
+    <main className="auth-page">
+      <PageHead
+        title="Create Account"
+        lead="Join FinCore Nexus digital banking."
+      />
 
-      <section className="block">
-        <div className="container">
-          <div className="panel form-card">
-            <h2>Create your account</h2>
+      <section className="auth-section">
+        <div className="container auth-container">
+
+          <div className="panel form-card auth-card">
+
+            <div className="auth-brand">
+              <div className="auth-logo">
+                <Icon name="user" size={26} />
+              </div>
+
+              <span>FINCORE NEXUS</span>
+            </div>
+
+            <h2>Create Your Account</h2>
+
+            <p className="auth-description">
+              Register to get started with secure digital banking.
+            </p>
 
             {error && (
               <div className="notice error" role="alert">
@@ -86,8 +143,12 @@ export default function SignUp() {
             )}
 
             <form onSubmit={handleSubmit}>
+
               <div className="field">
-                <label htmlFor="signup-name">Full name</label>
+                <label htmlFor="signup-name">
+                  Full name
+                </label>
+
                 <input
                   id="signup-name"
                   name="name"
@@ -96,12 +157,16 @@ export default function SignUp() {
                   value={form.name}
                   onChange={handleChange}
                   autoComplete="name"
+                  maxLength={100}
                   required
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="signup-phone">Mobile number</label>
+                <label htmlFor="signup-phone">
+                  Mobile number
+                </label>
+
                 <input
                   id="signup-phone"
                   name="phone"
@@ -111,12 +176,16 @@ export default function SignUp() {
                   onChange={handleChange}
                   autoComplete="tel-national"
                   maxLength={10}
+                  inputMode="numeric"
                   required
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="signup-email">Email address</label>
+                <label htmlFor="signup-email">
+                  Email address
+                </label>
+
                 <input
                   id="signup-email"
                   name="email"
@@ -127,26 +196,40 @@ export default function SignUp() {
                   autoComplete="email"
                   required
                 />
-                <span className="hint">We will send a verification OTP to this email.</span>
+
+                <span className="hint">
+                  We will send a verification OTP to this email.
+                </span>
               </div>
 
               <div className="field">
-                <label htmlFor="signup-password">Password</label>
+                <label htmlFor="signup-password">
+                  Password
+                </label>
+
                 <input
                   id="signup-password"
                   name="password"
                   type="password"
-                  placeholder="At least 8 characters, with a letter and a number"
+                  placeholder="At least 8 characters"
                   value={form.password}
                   onChange={handleChange}
                   autoComplete="new-password"
                   minLength={8}
+                  maxLength={64}
                   required
                 />
+
+                <span className="hint">
+                  Must contain at least one letter and one number.
+                </span>
               </div>
 
               <div className="field">
-                <label htmlFor="signup-confirm">Confirm password</label>
+                <label htmlFor="signup-confirm">
+                  Confirm password
+                </label>
+
                 <input
                   id="signup-confirm"
                   name="confirmPassword"
@@ -161,20 +244,31 @@ export default function SignUp() {
 
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary auth-submit"
                 disabled={loading}
-                style={{ marginTop: 12 }}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? (
+                  "Creating account..."
+                ) : (
+                  <>
+                    <Icon name="user" size={18} />
+                    Create Account
+                  </>
+                )}
               </button>
+
             </form>
 
-            <p className="note" style={{ marginTop: 18 }}>
-              Already have an account? <Link to="/sign-in">Sign in</Link>
+            <p className="auth-footer-text">
+              Already have an account?{" "}
+              <Link to="/sign-in">
+                Sign in
+              </Link>
             </p>
+
           </div>
         </div>
       </section>
-    </>
+    </main>
   );
 }
