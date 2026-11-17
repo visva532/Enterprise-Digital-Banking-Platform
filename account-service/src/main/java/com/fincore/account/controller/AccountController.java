@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.fincore.account.dto.StatementDtos.StatementEntry;
+import java.util.List;
 
 import static com.fincore.account.dto.AccountDtos.*;
 
@@ -26,6 +28,11 @@ public class AccountController {
     public InitiateResponse open(@AuthenticationPrincipal AuthUser user,
                                  @Valid @RequestBody OpenAccountRequest req) {
         return accountService.initiate(user, req);
+    }
+    @GetMapping("/{accountId}/transactions")
+    public List<StatementEntry> transactions(@AuthenticationPrincipal AuthUser user,
+                                             @PathVariable String accountId) {
+        return accountService.myTransactions(user, accountId);
     }
 
     @PostMapping("/open/verify")

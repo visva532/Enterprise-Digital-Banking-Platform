@@ -1,6 +1,7 @@
 package com.fincore.customer.service;
 
 import com.fincore.customer.entity.Customer;
+import com.fincore.customer.enums.KycStatus;
 import com.fincore.customer.exception.ApiException;
 import com.fincore.customer.repository.CustomerRepository;
 import com.fincore.customer.security.AuthUser;
@@ -46,6 +47,18 @@ public class CustomerService {
         return repository.findByUserId(userId)
                 .map(CustomerResponse::from)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Customer not found"));
+    }
+    // Called by kyc-service (through an internal endpoint) whenever a customer's KYC status changes
+    @Transactional
+    public void updateKycStatus(String userId, String email, KycStatus status) {
+        Customer c = repository.findByUserId(userId).orElseGet(() -> {
+            Customer created = new Customer();
+            created.setUserId(userId);
+            created.setEmail(email == null || email.isBlank() ? "unknown" : email);
+            return created;
+        });
+        c.setKycStatus(status);
+        repository.save(c);
     }
     @Transactional(readOnly = true)
     public List<CustomerResponse> search(String q) {

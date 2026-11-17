@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.fincore.account.event.AccountOpenedEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import com.fincore.account.dto.StatementDtos.StatementEntry;
+import com.fincore.account.repository.TransactionRepository;
+import org.springframework.data.domain.PageRequest;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -31,6 +34,7 @@ public class AccountService {
     private final OtpService otpService;
     private final PiiHasher piiHasher;
     private final ApplicationEventPublisher events;
+    private final TransactionRepository transactionRepository;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -85,6 +89,15 @@ public class AccountService {
         String masked = maskEmail(account.getEmail());
         return new InitiateResponse(account.getId(), masked,
                 "We sent a 6-digit OTP to " + masked + ". Enter it to open your account.");
+    }
+    // A customer's own statement. The account must belong to the signed-in user.
+    @Transactional(readOnly = true)
+    public List<StatementEntry> myTransactions(AuthUser user, String accountId) {
+        accountRepository.findByIdAndUserId(accountId, user.userId())
+                .filter(a -> a.getStatus() != AccountStatus.PENDING_VERIFICATION)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Account not found"));
+        return transactionRepository.findByAccountIdOrderByCreatedAtDesc(accountId, PageRequest.of(0, 100))
+                .stream().map(StatementEntry::from).toList();
     }
 
     // Step 2: verify the OTP, then generate the account number and activate

@@ -39,6 +39,11 @@ public class Transaction {
 
     @Column(length = 150)
     private String createdBy;
+    @Column(length = 100)
+    private String counterpartyName;
+
+    @Column(length = 20)
+    private String counterpartyAccount;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

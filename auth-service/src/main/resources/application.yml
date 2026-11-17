@@ -27,7 +27,7 @@ management:
 app:
   jwt:
     secret: ${JWT_SECRET:fincore-nexus-dev-secret-key-change-me-in-production-0123456789}
-    expiration-minutes: 15
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
 
   otp:
     expiry-minutes: 5

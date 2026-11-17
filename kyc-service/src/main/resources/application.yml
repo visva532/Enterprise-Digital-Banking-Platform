@@ -1,0 +1,47 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: kyc-service
+  datasource:
+    url: jdbc:mysql://localhost:3307/kyc_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
+  mail:
+    host: localhost
+    port: 1025
+
+management:
+  health:
+    mail:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:fincore-nexus-dev-secret-key-change-me-in-production-0123456789}   # MUST match the other services
+  internal:
+    api-key: ${INTERNAL_API_KEY:fincore-internal-dev-key-change-me-0123456789}              # MUST match the other services
+  pii:
+    secret: ${PII_SECRET:fincore-pii-dev-secret-change-me-in-production-9876543210}
+  otp:
+    expiry-minutes: 5
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+  mail:
+    from: no-reply@fincore.com
+  customer-service:
+    url: ${CUSTOMER_SERVICE_URL:http://localhost:8081}
+  kyc:
+    validity-days: 730          # KYC stays valid for 2 years
+    reminder-days: 30           # reminder email 30 days before it expires
+    storage-dir: ${KYC_STORAGE_DIR:./kyc-uploads}
+    watchlist: ${KYC_WATCHLIST:SANCTIONED PERSON,BLOCKED PERSON}   # demo screening list

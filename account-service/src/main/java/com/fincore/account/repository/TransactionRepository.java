@@ -12,4 +12,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
     List<Transaction> findByAccountIdOrderByCreatedAtDesc(String accountId, Pageable pageable);
 
     List<Transaction> findByCreatedAtGreaterThanEqual(Instant from);
+
+    boolean existsByReference(String reference);
 }

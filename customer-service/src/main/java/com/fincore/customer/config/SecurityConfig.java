@@ -1,9 +1,9 @@
-
 package com.fincore.customer.config;
 
+import com.fincore.customer.security.InternalApiKeyFilter;
 import com.fincore.customer.security.JwtAuthFilter;
 import com.fincore.customer.security.JwtService;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -25,85 +25,31 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtService jwtService
-    ) throws Exception {
-
-        http
-                .csrf(csrf -> csrf.disable())
-
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService,
+                                           @Value("${app.internal.api-key}") String internalKey) throws Exception {
+        http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
-
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        // Public health check
-                        .requestMatchers("/actuator/health")
-                        .permitAll()
-
-                        // Customer can access their own profile
-                        .requestMatchers("/api/customers/me")
-                        .hasRole("CUSTOMER")
-
-                        // Staff can access customer records
-                        .requestMatchers(
-                                "/api/customers/by-user/**",
-                                "/api/staff/**"
-                        )
-                        .hasAnyRole("TELLER", "MANAGER", "ADMIN")
-
-                        // Deny all other requests
-                        .anyRequest()
-                        .denyAll()
-                )
-
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
-                        )
-                )
-
-                .addFilterBefore(
-                        new JwtAuthFilter(jwtService),
-                        UsernamePasswordAuthenticationFilter.class
-                );
-
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/internal/**").hasRole("SERVICE")
+                        .requestMatchers("/api/customers/me").hasRole("CUSTOMER")
+                        .requestMatchers("/api/customers/by-user/**", "/api/staff/**").hasAnyRole("TELLER", "MANAGER", "ADMIN")
+                        .anyRequest().denyAll())
+                .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .addFilterBefore(new InternalApiKeyFilter(internalKey), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173"
-        ));
-
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
-
+        config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
 }

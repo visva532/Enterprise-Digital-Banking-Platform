@@ -60,7 +60,8 @@ public class EmailService {
     // Ready for when deposit / withdraw / transfer are built
     @Async
     public void sendTransactionAlert(String to, String holderName, boolean credited, BigDecimal amount,
-                                     String accountNumber, BigDecimal balanceAfter, String reference) {
+                                     String accountNumber, BigDecimal balanceAfter, String reference,
+                                     String counterparty, String note) {
         NumberFormat inr = NumberFormat.getCurrencyInstance(Locale.of("en", "IN"));
         String verb = credited ? "credited to" : "debited from";
         String color = credited ? "#15803d" : "#b91c1c";
@@ -68,23 +69,34 @@ public class EmailService {
         String when = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"))
                 .format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a", Locale.ENGLISH));
 
-        String body = """
-                <p>Dear %s,</p>
-                <p><span style="font-size:22px;font-weight:bold;color:%s">%s</span> has been %s your account %s.</p>
-                <table style="border-collapse:collapse;font-size:14px">
-                  <tr><td style="padding:4px 16px 4px 0;color:#6b7280">Date</td><td>%s</td></tr>
-                  <tr><td style="padding:4px 16px 4px 0;color:#6b7280">Reference</td><td>%s</td></tr>
-                  <tr><td style="padding:4px 16px 4px 0;color:#6b7280">Available balance</td><td>%s</td></tr>
-                </table>
-                <p style="color:#6b7280;font-size:13px">If you do not recognise this transaction, contact support immediately.</p>
-                """.formatted(HtmlUtils.htmlEscape(holderName), color, inr.format(amount), verb, maskedAccount,
-                when, HtmlUtils.htmlEscape(reference), inr.format(balanceAfter));
+        boolean hasCounterparty = counterparty != null && !counterparty.isBlank();
+        boolean hasNote = note != null && !note.isBlank();
+
+        String rows = (hasCounterparty ? row(credited ? "Received from" : "Sent to", counterparty) : "")
+                + (hasNote ? row("Remarks", note) : "")
+                + row("Date", when)
+                + row("Reference", reference)
+                + row("Available balance", inr.format(balanceAfter));
+
+        String body = "<p>Dear " + HtmlUtils.htmlEscape(holderName) + ",</p>"
+                + "<p><span style=\"font-size:22px;font-weight:bold;color:" + color + "\">" + inr.format(amount)
+                + "</span> has been " + verb + " your account " + maskedAccount + ".</p>"
+                + "<table style=\"border-collapse:collapse;font-size:14px\">" + rows + "</table>"
+                + "<p style=\"color:#6b7280;font-size:13px\">If you do not recognise this transaction, contact support immediately.</p>";
 
         String text = inr.format(amount) + " has been " + verb + " your account " + maskedAccount
-                + " on " + when + ". Reference: " + reference + ". Available balance: " + inr.format(balanceAfter) + ".";
+                + (hasCounterparty ? (credited ? ", received from " : ", sent to ") + counterparty : "")
+                + " on " + when + ". Reference: " + reference
+                + ". Available balance: " + inr.format(balanceAfter) + ".";
 
-        String subject = inr.format(amount) + (credited ? " credited to " : " debited from ") + "your account " + maskedAccount;
+        String subject = inr.format(amount) + (credited ? " credited to " : " debited from ")
+                + "your account " + maskedAccount;
         send(to, subject, layout(credited ? "Money received" : "Money debited", body), text);
+    }
+
+    private String row(String label, String value) {
+        return "<tr><td style=\"padding:4px 16px 4px 0;color:#6b7280\">" + label + "</td><td>"
+                + HtmlUtils.htmlEscape(value) + "</td></tr>";
     }
 
     private void send(String to, String subject, String html, String text) {

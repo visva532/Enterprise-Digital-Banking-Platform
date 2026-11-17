@@ -22,6 +22,8 @@ management:
       enabled: false
 
 app:
+  internal:
+    api-key: ${INTERNAL_API_KEY:fincore-internal-dev-key-change-me-0123456789}
   jwt:
     secret: ${JWT_SECRET:fincore-nexus-dev-secret-key-change-me-in-production-0123456789}   # MUST match auth-service
   pii:

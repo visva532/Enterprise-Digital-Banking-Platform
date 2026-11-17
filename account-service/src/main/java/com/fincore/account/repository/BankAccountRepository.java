@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -49,5 +51,13 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, String
             + "where a.status <> com.fincore.account.enums.AccountStatus.PENDING_VERIFICATION")
     long countCustomers();
 
+
     List<BankAccount> findTop5ByStatusInOrderByBalanceDesc(Collection<AccountStatus> statuses);
+    // Locks the row so two payments can never spend the same balance
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from BankAccount a where a.accountNumber = :number")
+    Optional<BankAccount> findByAccountNumberForUpdate(@Param("number") String number);
+
+    @Query("select a.accountNumber from BankAccount a where a.userId = :userId and a.status in :statuses order by a.createdAt desc")
+    List<String> findAccountNumbersByUser(@Param("userId") String userId, @Param("statuses") Collection<AccountStatus> statuses);
 }

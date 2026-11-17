@@ -43,11 +43,13 @@ public final class StaffDtos {
 
     public record TransactionView(
             String id, TransactionType type, BigDecimal amount, BigDecimal balanceAfter,
-            String description, String reference, String createdBy, Instant createdAt) {
+            String description, String reference, String createdBy,
+            String counterpartyName, String counterpartyAccount, Instant createdAt) {
 
         public static TransactionView from(Transaction t) {
             return new TransactionView(t.getId(), t.getType(), t.getAmount(), t.getBalanceAfter(),
-                    t.getDescription(), t.getReference(), t.getCreatedBy(), t.getCreatedAt());
+                    t.getDescription(), t.getReference(), t.getCreatedBy(),
+                    t.getCounterpartyName(), t.getCounterpartyAccount(), t.getCreatedAt());
         }
     }
 

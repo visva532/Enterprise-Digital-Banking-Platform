@@ -20,6 +20,6 @@ public class NotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onTransactionAlert(TransactionAlertEvent e) {
         emailService.sendTransactionAlert(e.email(), e.holderName(), e.credited(), e.amount(),
-                e.accountNumber(), e.balanceAfter(), e.reference());
+                e.accountNumber(), e.balanceAfter(), e.reference(), e.counterparty(), e.note());
     }
 }
